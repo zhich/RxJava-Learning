@@ -12,6 +12,8 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.BiFunction;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * 组合 / 合并操作符
@@ -45,6 +47,29 @@ public class CombinedMergeOperatorsActivity extends BaseActivity {
         }
     };
 
+    Observer mObserverString = new Observer<String>() {
+        @Override
+        public void onSubscribe(Disposable d) { // 默认最先调用复写的 onSubscribe()
+            Log.e(TAG, "开始采用 subscribe 连接");
+        }
+
+        @Override
+        public void onNext(String value) {
+            Log.e(TAG, "接收到了事件 " + value);
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            Log.e(TAG, "对 Error 事件作出响应---" + e.getMessage());
+        }
+
+        @Override
+        public void onComplete() {
+            Log.e(TAG, "对 Complete 事件作出响应");
+            Log.e(TAG, "----------------------------------------------------------------------------------------");
+        }
+    };
+
     @Override
     protected int getLayoutResource() {
         return 0;
@@ -54,7 +79,8 @@ public class CombinedMergeOperatorsActivity extends BaseActivity {
     protected void init() {
 //        concat_concatArray(); // 组合多个被观察者，合并后按发送顺序【串行执行】
 //        merge_mergeArray(); // 组合多个被观察者，合并后按“时间线”【并行执行】
-        concatDelayError_mergeDelayError(); // 推迟发送 onError 事件
+//        concatDelayError_mergeDelayError(); // 推迟发送 onError 事件
+        zip();
     }
 
     private void concat_concatArray() {
@@ -137,5 +163,72 @@ public class CombinedMergeOperatorsActivity extends BaseActivity {
                 }),
                 Observable.just(4, 5, 6))
                 .subscribe(mObserverInteger);
+    }
+
+    private void zip() {
+        /**
+         * 作用：
+         * 合并 多个被观察者（Observable）发送的事件，生成一个新的事件序列（即组合过后的事件序列），并最终发送
+         * 注意：
+         * 1、事件组合方式 = 严格按照原先事件序列 进行对位合并
+         * 2、最终合并的事件数量 = 多个被观察者（Observable）中数量最少的数量
+         */
+        Observable observable1 = Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(ObservableEmitter emitter) throws Exception {
+                Log.e(TAG, "被观察者 1 发送了事件 1");
+                emitter.onNext(1);
+                Thread.sleep(1000);
+
+                Log.e(TAG, "被观察者 1 发送了事件 2");
+                emitter.onNext(2);
+                Thread.sleep(1000);
+
+                Log.e(TAG, "被观察者 1 发送了事件 3");
+                emitter.onNext(3);
+                Thread.sleep(1000);
+
+//                emitter.onComplete();
+            }
+        }).subscribeOn(Schedulers.io()); // 设置 observable1 在工作线程 1 中工作
+
+        Observable observable2 = Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(ObservableEmitter emitter) throws Exception {
+                Log.e(TAG, "被观察者 2 发送了事件 A");
+                emitter.onNext("A");
+                Thread.sleep(1000);
+
+                Log.e(TAG, "被观察者 2 发送了事件 B");
+                emitter.onNext("B");
+                Thread.sleep(1000);
+
+                Log.e(TAG, "被观察者 2 发送了事件 C");
+                emitter.onNext("C");
+                Thread.sleep(1000);
+
+                Log.e(TAG, "被观察者 2 发送了事件 D");
+                emitter.onNext("D");
+                Thread.sleep(1000);
+
+//                emitter.onComplete();
+            }
+        }).subscribeOn(Schedulers.newThread()); // 设置 observable2 在工作线程 2 中工作
+
+        // 假设不作线程控制，则该两个被观察者会在同一个线程中工作，即发送事件存在先后顺序，而不是同时发送
+
+        // 注：创建 BiFunction 对象传入的第 3 个参数 = 合并后数据的数据类型
+        Observable.zip(observable1, observable2, new BiFunction<Integer, String, String>() {
+            @Override
+            public String apply(Integer integer, String string) throws Exception {
+                return integer + string;
+            }
+        }).subscribe(mObserverString);
+
+        /**
+         * 特别注意：
+         * 1、尽管 observable2 的事件 D 没有事件与其合并，但还是会继续发送
+         * 2、若在 observable1 & observable2 的事件序列最后发送 onComplete() 事件，则 observable2 的事件 D 也不会发送
+         */
     }
 }
