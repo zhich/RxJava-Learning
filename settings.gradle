@@ -1,1 +1,1 @@
-include ':app', ':get-started', ':lib-base'
+include ':app', ':getting-started', ':lib-base'

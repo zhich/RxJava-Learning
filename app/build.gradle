@@ -19,6 +19,6 @@ android {
 }
 
 dependencies {
-    implementation project(':get-started')
+    implementation project(':getting-started')
     annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterknife"
 }
