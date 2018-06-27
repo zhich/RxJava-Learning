@@ -112,7 +112,9 @@ public class CombinedMergeOperatorsActivity extends BaseActivity {
 //        combineLatest();
 //        combineLatestDelayError(); // 作用类似于 concatDelayError() / mergeDelayError() ，即错误处理
 //        reduce(); // 把被观察者需要发送的事件聚合成 1 个事件 & 发送
-        collect(); // 将被观察者 Observable 发送的数据事件收集到一个数据结构里
+//        collect(); // 将被观察者 Observable 发送的数据事件收集到一个数据结构里
+//        startWith_startWithArray(); // 发送事件前追加发送事件
+        count(); // 统计发送事件数量
     }
 
     private void concat_concatArray() {
@@ -376,5 +378,59 @@ public class CombinedMergeOperatorsActivity extends BaseActivity {
 
             }
         });
+    }
+
+    private void startWith_startWithArray() {
+        /**
+         * 作用：
+         * 在一个被观察者发送事件前，追加发送一些数据 / 一个新的被观察者
+         */
+
+        // 在一个被观察者发送事件前，追加发送一些数据
+        // 注：追加数据顺序 = 后调用先追加
+        Observable.just(4, 5, 6)
+                .startWith(0) // 追加单个数据 = startWith()
+                .startWithArray(1, 2, 3) // 追加多个数据 = startWithArray()
+                .subscribe(mObserverInteger);
+
+        /**
+         * 接收到了事件 1
+         * 接收到了事件 2
+         * 接收到了事件 3
+         * 接收到了事件 0
+         * 接收到了事件 4
+         * 接收到了事件 5
+         * 接收到了事件 6
+         */
+
+        // 在一个被观察者发送事件前，追加发送被观察者 & 发送数据
+        // 注：追加数据顺序 = 后调用先追加
+        Observable.just(4, 5, 6)
+                .startWith(Observable.just(1, 2, 3))
+                .subscribe(mObserverInteger);
+
+        /**
+         * 接收到了事件 1
+         * 接收到了事件 2
+         * 接收到了事件 3
+         * 接收到了事件 4
+         * 接收到了事件 5
+         * 接收到了事件 6
+         */
+    }
+
+    private void count() {
+        /**
+         * 作用：
+         * 统计被观察者发送事件的数量
+         */
+        Observable.just(1, 2, 3, 4)
+                .count()
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long aLong) throws Exception {
+                        Log.e(TAG, "发送的事件数量 =  " + aLong); // 4
+                    }
+                });
     }
 }
