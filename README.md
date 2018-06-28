@@ -21,3 +21,6 @@
 
 - [网络请求嵌套回调](https://github.com/zhich/rxjava-learn/blob/master/getting-started/src/main/java/com/zch/rxjava/getstarted/nesting_network_request/UserActivity.java)
   > flatMap
+
+- [从磁盘 / 内存缓存中获取缓存数据](https://github.com/zhich/rxjava-learn/blob/master/getting-started/src/main/java/com/zch/rxjava/getstarted/GetDataFromCacheActivity.java)
+  > concat、firstElement

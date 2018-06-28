@@ -34,4 +34,5 @@ ext {
     retrofit = "2.4.0"
     rxjava2Adapter = "1.0.0"
     converterGson = "2.4.0"
+    supportLibraryVersion = "27.1.1"
 }

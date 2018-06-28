@@ -10,5 +10,6 @@
         <activity android:name=".CombinedMergeOperatorsActivity" />
         <activity android:name=".unconditional_network_request_polling.GetTranslationActivity" />
         <activity android:name=".nesting_network_request.UserActivity" />
+        <activity android:name=".GetDataFromCacheActivity" />
     </application>
 </manifest>

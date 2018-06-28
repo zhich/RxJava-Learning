@@ -28,7 +28,7 @@ android {
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
 
-    api 'com.android.support:appcompat-v7:27.1.1'
+    api "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
 
     api "io.reactivex.rxjava2:rxjava:$rootProject.rxjava"
     api "io.reactivex.rxjava2:rxandroid:$rootProject.rxandroid"
@@ -37,4 +37,5 @@ dependencies {
     api "com.squareup.retrofit2:retrofit:$rootProject.retrofit"
     api "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:$rootProject.rxjava2Adapter"
     api "com.squareup.retrofit2:converter-gson:$rootProject.converterGson"
+    api "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
 }
